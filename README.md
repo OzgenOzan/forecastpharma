@@ -1,4 +1,4 @@
-# labelandforecastpharma
+# Forecasting Pharmaceutical Products with intermittent demand
 
 I am working on a project regarding demand forecasting for pharmaceuticals.
 
