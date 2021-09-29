@@ -22,7 +22,9 @@ library(pacman)
 
 p_load(readxl, readr, ggplot2, forecast, fpp3, tidyverse, TTR, tibble, tsibble, tsibbledata, feasts, fable, dplyr, zoo, lubridate, janitor, xts)
 
-dat <- read_xlsx("C://Users/oozgen/Desktop/Albania Statistical Analysis/dat.xlsx", col_names=T)
+# If you are using additional packages, or feel like it, you can use `conflict_scout()` command from *conflicted* package to check conflicts betweeen packages.
+
+dat <- read_xlsx("~/Desktop/filename.xlsx", col_names=T)
 
 # We need to format the 'Import Date' column as Date format (Year/Month), and sort by Date. And also since labeling is done numerically, we need to convert the 'Product Code' column from numeric format to character format in R.
 
