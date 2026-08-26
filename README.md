@@ -14,48 +14,29 @@ The raw import data which used includes information of; import dates, labels of 
 
 First of all i need to merge the same dated and same labelled entries, for example, there is only one importation on 18/06/2019 for product labelled as "1". Also i need to convert the data frame to time series, sorted by dates and with 'Product Code' as a character and 'Quantity' as numeric.
 
-```
+## Code
 
-# Pacman, version 0.4.1 is used to organize the packages used in R.
+The full script lives in [`forecastpharma.R`](forecastpharma.R) (previously the entire script was duplicated in this README; the copy was removed to avoid drift).
 
-library(pacman)
+## Data
 
-p_load(readxl, readr, ggplot2, forecast, fpp3, tidyverse, TTR, tibble, tsibble, tsibbledata, feasts, fable, dplyr, zoo, lubridate, janitor, xts)
+- `filename.xlsx`: 12,710 import records, 489 unique product codes, covering 2018-01-05 to 2020-12-11 (12 quarters).
+- **Provenance / terms:** the source of this import data is not documented in this repository. The owner should confirm the rights to publish/redistribute this dataset; if that is not possible, it should be replaced with a synthetic sample.
 
-# If you are using additional packages, or feel like it, you can use `conflict_scout()` command from *conflicted* package to check conflicts betweeen packages.
+## Dependencies
 
-dat <- read_xlsx("~/Desktop/filename.xlsx", col_names=T)
+R (developed on R 4.1). Packages: readxl, readr, ggplot2, forecast, fpp3, tidyverse, TTR, tibble, tsibble, tsibbledata, feasts, fable, dplyr, zoo, lubridate, janitor, xts — loaded via `pacman::p_load`, which installs the **latest** CRAN versions at run time (unpinned). After running, capture `sessionInfo()` and record the output, or adopt `renv` for version pinning.
 
-# We need to format the 'Import Date' column as Date format (Year/Month), and sort by Date. And also since labeling is done numerically, we need to convert the 'Product Code' column from numeric format to character format in R.
+## Output format
 
-dat <- transform(dat, 'Product Code' = as.character(dat$`Product Code`))
+`resultmatrix.csv` (semicolon-separated):
 
-class(dat)
+- **Columns:** one per product, labeled with the product code.
+- **Rows 1–12:** observed quarterly totals, labeled with the quarter (e.g. `2018`, `2018.25`, ...).
+- **Rows 13–20:** 8-quarter-ahead Croston forecasts, labeled `forecast_1` … `forecast_8`.
 
-z <- dat %>%
-  type.convert(as.is = TRUE) %>%
-  read.zoo(format = "%Y-%m-%d", FUN = as.yearqtr, index.column = 1,
-           split = "Product.Code", aggregate = sum)
+## Status / disclaimer
 
-tt <- merge(z, zoo(, seq(start(z), end(z), 1/4))) |>
-  as.ts()
-
-tt[is.na(tt)]=0
-
-result_matrix <- matrix(, nrow = 20, ncol = 1149)
-
-for(i in 1:1149){
-  
-  res_i <- croston(tt[, i], h=8)
-    res_i <- append(res_i$x, res_i$mean)
-      result_matrix[, i] <- res_i
-  
-  }
-
-write.table(result_matrix, "resultmatrix.csv", sep = ";")
-
-```
+The forecasts are exploratory and **unvalidated**: there is no train/test split, no accuracy evaluation, no benchmark comparison, and Croston is applied to all series including non-intermittent ones. See [issue #1](../../issues/1) before using any output.
 
 Since croston method for forecasting is valid for intermittent demand. I've to organize the data according to infrequently imported pharmaceuticals and frequently imported pharmaceuticals. And for the frequent ones, i should find a suitable method for forecasting.
-
-
